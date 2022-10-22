@@ -1,16 +1,91 @@
 
 service: sls-remeber-votes
 
+plugins: 
+  - serverless-offline      
+
+custom:
+  allowedHeaders:
+    - Accept
+    - Content-Type
+    - Content-Lenght
+    - Authorization
+    - X-Amz-Date
+    - X-Api-Key
+    - X-Amz-Security-Token
+    - X-Amz-User-Agent
+    - app_user_id
+    - app_user_name
+
 provider:
   name: aws
   runtime: nodejs12.x
   region:  us-east-1
-  stage: dev
+  stage: prod
   memorySize: 128
   timeout: 5
   endpointType: regional
   environment:
     VOTES_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:PutItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self.provider.environment.VOTES_TABLE}"
+
+functions:
+  add-vote:
+    handler: api/add-vote.handler
+    description: POST /vote
+    events:
+      - http:
+          path: vote
+          method: post
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+  update-vote:
+    handler: api/update-vote.handler
+    description: PATCH /vote
+    events:
+      - http:
+          path: vote
+          method: patch
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+  get-votes:
+    handler: api/get-votes.handler
+    description: GET /votes
+    events:
+      - http:
+          path: votes
+          method: get
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+  get-vote:
+    handler: api/get-vote.handler
+    description: GET /vote/n/{vote_id}
+    events:
+      - http:
+          path: vote
+          method: get
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
+  delete-vote:
+    handler: api/delete-vote.handler
+    description: DELETE /votes
+    events:
+      - http:
+          path: vote/t/{timestamp}
+          method: delete
+          cors:
+            origin: '*'
+            headers: ${self:custom.allowedHeaders}
 
 resources:
   Resources:
