@@ -8,7 +8,11 @@ const tableName = process.env.VOTES_TABLE;
 
 exports.handler = async (event) => {
     try {
-        
+        return {
+            statusCode: 200,
+            headers: util.getResponseHeaders(),
+            body: JSON.stringify('')
+        }
     } catch (error) {
         console.log("Error", err)
         return {
