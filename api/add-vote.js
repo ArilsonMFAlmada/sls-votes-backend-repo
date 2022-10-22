@@ -3,7 +3,6 @@ AWS.config.update({ region: 'us-east-1' });
 
 const moment = require('moment');
 const uuidv4 = require('uuid/v4');
-
 const util =  require('./util.js')
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
