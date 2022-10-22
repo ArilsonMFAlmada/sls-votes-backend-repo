@@ -1,0 +1,53 @@
+
+service: sls-remeber-votes
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region:  us-east-1
+  stage: dev
+  memorySize: 128
+  timeout: 5
+  endpointType: regional
+  environment:
+    VOTES_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+
+resources:
+  Resources:
+    VotesTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties: 
+        TableName: ${self:provider.environment.VOTES_TABLE}
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: N
+          - AttributeName: vote_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+          - AttributeName: timestamp
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+         - IndexName: vote_id-index
+           KeySchema: 
+            - AttributeName: vote_id
+              KeyType: HASH
+           Projection:
+            ProjectionType: ALL
+           ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+
+
+
+  
+
+
+
